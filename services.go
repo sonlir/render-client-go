@@ -9,47 +9,47 @@ import (
 const servicesPath = "services"
 
 type Service struct {
-	ID             string         `json:"id"`
-	Type           string         `json:"type"`
-	Repo           string         `json:"repo"`
-	Name           string         `json:"name"`
 	AutoDeploy     string         `json:"autoDeploy"`
-	Brach          string         `json:"branch"`
+	Branch         string         `json:"branch"`
 	BuildFilter    BuildFilter    `json:"buildFilter"`
 	CreateAt       time.Time      `json:"createdAt"`
-	NotifyOnFail   string         `json:"notifyOnFail"`
+	ID             string         `json:"id"`
 	Image          Image          `json:"image"`
+	ImagePath      string         `json:"imagePath"`
+	Name           string         `json:"name"`
+	NotifyOnFail   string         `json:"notifyOnFail"`
 	OwnerId        string         `json:"ownerId"`
-	Slug           string         `json:"slug"`
+	Repo           string         `json:"repo"`
 	RootDir        string         `json:"rootDir"`
+	ServiceDetails ServiceDetails `json:"serviceDetails"`
+	Slug           string         `json:"slug"`
 	Suspended      string         `json:"suspended"`
 	Suspenders     []string       `json:"suspenders"`
+	Type           string         `json:"type"`
 	UpdatedAt      time.Time      `json:"updatedAt"`
-	ServiceDetails ServiceDetails `json:"serviceDetails"`
-	ImagePath      string         `json:"imagePath"`
 }
 
 type ServiceDetails struct {
 	Autoscaling                Autoscaling        `json:"autoscaling"`
-	BuildPlan                  string             `json:"buildPlan"`
 	BuildCommand               string             `json:"buildCommand"`
+	BuildPlan                  string             `json:"buildPlan"`
+	Disk                       Disk               `json:"disk"`
 	DockerCommand              string             `json:"dockerCommand"`
 	DockerContext              string             `json:"dockerContext"`
 	DockerfilePath             string             `json:"dockerfilePath"`
 	Env                        string             `json:"env"`
 	EnvSpecificDetails         EnvSpecificDetails `json:"envSpecificDetails"`
 	HealthCheckPath            string             `json:"healthCheckPath"`
-	PublishPath                string             `json:"publishPath"`
+	LastSuccessfulRunAt        string             `json:"lastSuccessfulRunAt"`
 	NumInstances               int                `json:"numInstances"`
 	OpenPorts                  []OpenPort         `json:"openPorts"`
 	ParentServer               ParentServer       `json:"parentServer"`
 	Plan                       string             `json:"plan"`
+	PublishPath                string             `json:"publishPath"`
 	PullRequestPreviewsEnabled string             `json:"pullRequestPreviewsEnabled"`
 	Region                     string             `json:"region"`
-	Url                        string             `json:"url"`
-	Disk                       Disk               `json:"disk"`
 	Schedule                   string             `json:"schedule"`
-	LastSuccessfulRunAt        string             `json:"lastSuccessfulRunAt"`
+	Url                        string             `json:"url"`
 }
 
 type BuildFilter struct {
@@ -110,18 +110,18 @@ type Services struct {
 }
 
 type ServiceData struct {
-	Type           string                `json:"type,omitempty"`
+	AutoDeploy     string                `json:"autoDeploy,omitempty"`
+	Branch         string                `json:"branch,omitempty"`
+	BuildFilter    BuildFilter           `json:"buildFilter,omitempty"`
+	EnvVars        []EnvironmentVariable `json:"envVars,omitempty"`
+	Image          Image                 `json:"image,omitempty"`
 	Name           string                `json:"name,omitempty"`
 	OwnerID        string                `json:"ownerId,omitempty"`
 	Repo           string                `json:"repo,omitempty"`
-	AutoDeploy     string                `json:"autoDeploy,omitempty"`
-	Branch         string                `json:"branch,omitempty"`
-	Image          Image                 `json:"image,omitempty"`
-	BuildFilter    BuildFilter           `json:"buildFilter,omitempty"`
 	RootDir        string                `json:"rootDir,omitempty"`
-	EnvVars        []EnvironmentVariable `json:"envVars,omitempty"`
 	SecretFiles    []SecretFiles         `json:"secretFiles,omitempty"`
 	ServiceDetails ServiceDetailsData    `json:"serviceDetails,omitempty"`
+	Type           string                `json:"type,omitempty"`
 }
 
 type ServiceDetailsData struct {
@@ -173,9 +173,9 @@ type EnvSpecificDetailsData struct {
 	StartCommand         string `json:"startCommand,omitempty"`
 }
 
-func (c *Client) GetServices() (*[]Services, error) {
+func (c *Client) GetServices(serviceType string) (*[]Services, error) {
 	services := []Services{}
-	err := c.doRequest(http.MethodGet, fmt.Sprintf("%s/%s", c.HostURL, servicesPath), nil, &services)
+	err := c.doRequest(http.MethodGet, fmt.Sprintf("%s/%s?type=%s", c.HostURL, servicesPath, serviceType), nil, &services)
 	if err != nil {
 		return nil, err
 	}
