@@ -69,12 +69,12 @@ func (c *Client) doRequest(method, url string, data interface{}, jsonSchema inte
 		return err
 	}
 
-	if res.StatusCode != http.StatusOK && res.StatusCode != http.StatusNoContent && res.StatusCode != http.StatusCreated {
+	if res.StatusCode != http.StatusOK && res.StatusCode != http.StatusNoContent && res.StatusCode != http.StatusCreated && res.StatusCode != http.StatusAccepted {
 		return fmt.Errorf("status code: %d, details: %s", res.StatusCode, body)
 	}
 
 	if jsonSchema != nil {
-		err = json.Unmarshal(body, jsonSchema)
+		err = json.Unmarshal(body, &jsonSchema)
 		if err != nil {
 			return err
 		}

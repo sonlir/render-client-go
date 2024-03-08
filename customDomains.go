@@ -3,47 +3,42 @@ package render
 import (
 	"fmt"
 	"net/http"
-	"time"
 )
 
 const customDomainsPath = "custom-domains"
 
 type CustomDomain struct {
-	ID                 string    `json:"id"`
-	Name               string    `json:"name"`
-	DomainType         string    `json:"domainType"`
-	PublicSuffix       string    `json:"publicSuffix"`
-	RedirectForName    string    `json:"redirectForName"`
-	VerificationStatus string    `json:"verificationStatus"`
-	CreatedAt          time.Time `json:"createdAt"`
-	Server             Server    `json:"server"`
+	ID                 *string `json:"id,omitempty"`
+	Name               string  `json:"name"`
+	DomainType         *string `json:"domainType,omitempty"`
+	PublicSuffix       *string `json:"publicSuffix,omitempty"`
+	RedirectForName    *string `json:"redirectForName,omitempty"`
+	VerificationStatus *string `json:"verificationStatus,omitempty"`
+	CreatedAt          *string `json:"createdAt,omitempty"`
+	Server             *Server `json:"server,omitempty"`
 }
 
 type Server struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+	ID   *string `json:"id,omitempty"`
+	Name *string `json:"name,omitempty"`
 }
 
 type CustomDomains struct {
-	CustomDomain CustomDomain `json:"customDomain"`
+	CustomDomain `json:"customDomain"`
 }
 
-type CustomDomainData struct {
-	Name string `json:"name"`
-}
-
-func (c *Client) GetCustomDomains(serviceId string) (*[]CustomDomains, error) {
-	customDomains := []CustomDomains{}
+func (c *Client) GetCustomDomains(serviceId string) ([]CustomDomain, error) {
+	var customDomains []CustomDomains
 	err := c.doRequest(http.MethodGet, fmt.Sprintf("%s/%s/%s/%s", c.HostURL, servicesPath, serviceId, customDomainsPath), nil, &customDomains)
 	if err != nil {
 		return nil, err
 	}
 
-	return &customDomains, nil
+	return CustomDomainsToSlice(customDomains), nil
 }
 
 func (c *Client) GetCustomDomain(serviceId, idOrName string) (*CustomDomain, error) {
-	customDomain := CustomDomain{}
+	var customDomain CustomDomain
 	err := c.doRequest(http.MethodGet, fmt.Sprintf("%s/%s/%s/%s/%s", c.HostURL, servicesPath, serviceId, customDomainsPath, idOrName), nil, &customDomain)
 	if err != nil {
 		return nil, err
@@ -52,16 +47,24 @@ func (c *Client) GetCustomDomain(serviceId, idOrName string) (*CustomDomain, err
 	return &customDomain, nil
 }
 
-func (c *Client) CreateCustomDomain(serviceId string, data CustomDomainData) (*[]CustomDomain, error) {
-	customDomain := []CustomDomain{}
+func (c *Client) CreateCustomDomain(serviceId string, data CustomDomain) ([]CustomDomain, error) {
+	var customDomain []CustomDomain
 	err := c.doRequest(http.MethodPost, fmt.Sprintf("%s/%s/%s/%s", c.HostURL, servicesPath, serviceId, customDomainsPath), data, &customDomain)
 	if err != nil {
 		return nil, err
 	}
 
-	return &customDomain, nil
+	return customDomain, nil
 }
 
 func (c *Client) DeleteCustomDomain(serviceId, idOrName string) error {
 	return c.doRequest(http.MethodDelete, fmt.Sprintf("%s/%s/%s/%s/%s", c.HostURL, servicesPath, serviceId, customDomainsPath, idOrName), nil, nil)
+}
+
+func CustomDomainsToSlice(customDomains []CustomDomains) []CustomDomain {
+	var result []CustomDomain
+	for _, customDomain := range customDomains {
+		result = append(result, customDomain.CustomDomain)
+	}
+	return result
 }
