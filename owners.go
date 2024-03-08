@@ -1,8 +1,9 @@
-package render
+package main
 
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 )
 
 const ownersPath = "owners"
@@ -15,25 +16,54 @@ type Owner struct {
 }
 
 type Owners struct {
-	Owner Owner `json:"owner"`
+	Owner `json:"owner"`
 }
 
-func (c *Client) GetOwners() (*[]Owners, error) {
-	owners := []Owners{}
-	err := c.doRequest(http.MethodGet, fmt.Sprintf("%s/%s", c.HostURL, ownersPath), nil, &owners)
+type GetOwnersArgs struct {
+	Name  string
+	Email string
+}
+
+func (c *Client) GetOwners(args *GetOwnersArgs) ([]Owner, error) {
+	var owners []Owners
+	parameters := url.Values{}
+	url, err := url.Parse(fmt.Sprintf("%s/%s", c.HostURL, ownersPath))
+	if err != nil {
+		return nil, err
+	}
+	if args != nil {
+		if args.Name != "" {
+			parameters.Add("name", args.Name)
+		}
+		if args.Email != "" {
+			parameters.Add("email", args.Email)
+		}
+	}
+
+	url.RawQuery = parameters.Encode()
+
+	err = c.doRequest(http.MethodGet, url.String(), nil, &owners)
 	if err != nil {
 		return nil, err
 	}
 
-	return &owners, nil
+	return OwnersToSlice(owners), nil
 }
 
 func (c *Client) GetOwner(id string) (*Owner, error) {
-	owner := Owner{}
+	var owner *Owner
 	err := c.doRequest(http.MethodGet, fmt.Sprintf("%s/%s/%s", c.HostURL, ownersPath, id), nil, &owner)
 	if err != nil {
 		return nil, err
 	}
 
-	return &owner, nil
+	return owner, nil
+}
+
+func OwnersToSlice(owners []Owners) []Owner {
+	var result []Owner
+	for _, owner := range owners {
+		result = append(result, owner.Owner)
+	}
+	return result
 }
