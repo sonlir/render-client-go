@@ -23,7 +23,7 @@ type Service struct {
 	Repo           string                `json:"repo,omitempty"`
 	RootDir        string                `json:"rootDir,omitempty"`
 	SecretFiles    []SecretFiles         `json:"secretFiles,omitempty"`
-	ServiceDetails interface{}           `json:"serviceDetails,omitempty"`
+	ServiceDetails ServiceDetails        `json:"serviceDetails,omitempty"`
 	Slug           string                `json:"slug,omitempty"`
 	Suspended      string                `json:"suspended,omitempty"`
 	Suspenders     []string              `json:"suspenders,omitempty"`
@@ -31,17 +31,7 @@ type Service struct {
 	UpdatedAt      string                `json:"updatedAt,omitempty"`
 }
 
-type StaticSiteDetails struct {
-	BuildCommand               string        `json:"buildCommand"`
-	ParentServer               *ParentServer `json:"parentServer"`
-	PablicPath                 string        `json:"publicPath"`
-	PullRequestPreviewsEnabled string        `json:"pullRequestPreviewsEnabled"`
-	URL                        string        `json:"url"`
-	Headers                    []Header      `json:"headers,omitempty"`
-	Routes                     []Route       `json:"routes,omitempty"`
-}
-
-type WebServiceDetails struct {
+type ServiceDetails struct {
 	Autoscaling                *Autoscaling        `json:"autoscaling,omitempty"`
 	Disk                       *Disk               `json:"disk,omitempty"`
 	Env                        string              `json:"env,omitempty"`
@@ -54,41 +44,12 @@ type WebServiceDetails struct {
 	PullRequestPreviewsEnabled string              `json:"pullRequestPreviewsEnabled,omitempty"`
 	Region                     string              `json:"region,omitempty"`
 	URL                        string              `json:"url,omitempty"`
-}
-
-type PrivateServiceDetails struct {
-	Autoscaling                *Autoscaling        `json:"autoscaling"`
-	Disk                       *Disk               `json:"disk"`
-	Env                        string              `json:"env"`
-	EnvSpecificDetails         *EnvSpecificDetails `json:"envSpecificDetails"`
-	NumInstances               int64               `json:"numInstances"`
-	OpenPorts                  []OpenPort          `json:"openPorts"`
-	ParentServer               *ParentServer       `json:"parentServer"`
-	Plan                       string              `json:"plan"`
-	PullRequestPreviewsEnabled string              `json:"pullRequestPreviewsEnabled"`
-	Region                     string              `json:"region"`
-	Url                        string              `json:"url"`
-}
-
-type BackgroundWorkerDetails struct {
-	Autoscaling                *Autoscaling        `json:"autoscaling"`
-	Disk                       *Disk               `json:"disk"`
-	Env                        string              `json:"env"`
-	EnvSpecificDetails         *EnvSpecificDetails `json:"envSpecificDetails"`
-	NumInstances               int64               `json:"numInstances"`
-	ParentServer               *ParentServer       `json:"parentServer"`
-	Plan                       string              `json:"plan"`
-	PullRequestPreviewsEnabled string              `json:"pullRequestPreviewsEnabled"`
-	Region                     string              `json:"region"`
-}
-
-type CronJobDetails struct {
-	Env                 string              `json:"env"`
-	EnvSpecificDetails  *EnvSpecificDetails `json:"envSpecificDetails"`
-	Plan                string              `json:"plan"`
-	Region              string              `json:"region"`
-	Schedule            string              `json:"schedule"`
-	LastSuccessfulRunAt string              `json:"lastSuccessfulRunAt"`
+	Schedule                   string              `json:"schedule"`
+	LastSuccessfulRunAt        string              `json:"lastSuccessfulRunAt"`
+	BuildCommand               string              `json:"buildCommand"`
+	PublicPath                 string              `json:"publicPath"`
+	Headers                    []Header            `json:"headers,omitempty"`
+	Routes                     []Route             `json:"routes,omitempty"`
 }
 
 type BuildFilter struct {
@@ -110,15 +71,15 @@ type Disk struct {
 }
 
 type Autoscaling struct {
-	Enabled  bool                `json:"enabled"`
-	Min      int64               `json:"min"`
-	Max      int64               `json:"max"`
-	Criteria AutoscalingCriteria `json:"criteria"`
+	Enabled  bool                 `json:"enabled"`
+	Min      int64                `json:"min,omitempty"`
+	Max      int64                `json:"max,omitempty"`
+	Criteria *AutoscalingCriteria `json:"criteria,omitempty"`
 }
 
 type AutoscalingCriteria struct {
-	CPU    AutoscalingCriteriaObject `json:"cpu,omitempty"`
-	Memory AutoscalingCriteriaObject `json:"memory,omitempty"`
+	CPU    *AutoscalingCriteriaObject `json:"cpu,omitempty"`
+	Memory *AutoscalingCriteriaObject `json:"memory,omitempty"`
 }
 
 type AutoscalingCriteriaObject struct {
@@ -263,6 +224,22 @@ func (c *Client) UpdateService(id string, data Service) (*Service, error) {
 	err = c.doRequest(http.MethodPatch, fmt.Sprintf("%s/%s/%s", c.HostURL, servicesPath, id), data, &service)
 	if err != nil {
 		return nil, err
+	}
+
+	if data.Type == "web_service" || data.Type == "private_service" || data.Type == "background_worker" {
+		if data.ServiceDetails.NumInstances != service.ServiceDetails.NumInstances {
+			scale := Scale{NumInstances: data.ServiceDetails.NumInstances}
+			err = c.doRequest(http.MethodPost, fmt.Sprintf("%s/%s/%s/scale", c.HostURL, servicesPath, id), scale, nil)
+			if err != nil {
+				return nil, err
+			}
+		}
+		if data.ServiceDetails.Autoscaling != nil {
+			err = c.doRequest(http.MethodPut, fmt.Sprintf("%s/%s/%s/autoscaling", c.HostURL, servicesPath, id), data.ServiceDetails.Autoscaling, nil)
+			if err != nil {
+				return nil, err
+			}
+		}
 	}
 
 	return &service, nil
