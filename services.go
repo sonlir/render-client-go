@@ -200,6 +200,15 @@ func (c *Client) CreateService(data Service) (*Service, error) {
 		return nil, err
 	}
 
+	if data.Type == "web_service" || data.Type == "private_service" || data.Type == "background_worker" {
+		if data.ServiceDetails.Autoscaling != nil {
+			err = c.doRequest(http.MethodPut, fmt.Sprintf("%s/%s/%s/autoscaling", c.HostURL, servicesPath, service.ID), data.ServiceDetails.Autoscaling, nil)
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+
 	return &service, nil
 }
 
