@@ -214,6 +214,7 @@ func (c *Client) CreateService(data Service) (*Service, error) {
 
 func (c *Client) UpdateService(id string, data Service) (*Service, error) {
 	service := Service{}
+	autoscaling := Autoscaling{}
 
 	services, err := c.GetServices(&GetServicesArgs{Name: data.Name})
 	if err != nil {
@@ -244,10 +245,11 @@ func (c *Client) UpdateService(id string, data Service) (*Service, error) {
 			}
 		}
 		if data.ServiceDetails.Autoscaling != nil {
-			err = c.doRequest(http.MethodPut, fmt.Sprintf("%s/%s/%s/autoscaling", c.HostURL, servicesPath, id), data.ServiceDetails.Autoscaling, nil)
+			err = c.doRequest(http.MethodPut, fmt.Sprintf("%s/%s/%s/autoscaling", c.HostURL, servicesPath, id), data.ServiceDetails.Autoscaling, &autoscaling)
 			if err != nil {
 				return nil, err
 			}
+			service.ServiceDetails.Autoscaling = &autoscaling
 		}
 	}
 
