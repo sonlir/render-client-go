@@ -88,14 +88,14 @@ type AutoscalingCriteriaObject struct {
 }
 
 type EnvSpecificDetails struct {
-	DockerCommand        string              `json:"dockerCommand"`
-	DockerContext        string              `json:"dockerContext"`
-	DockerfilePath       string              `json:"dockerfilePath"`
-	PreDeployCommand     string              `json:"preDeployCommand"`
-	RegistryCredential   *RegistryCredential `json:"registryCredential"`
-	BuildCommand         string              `json:"buildCommand"`
-	StartCommand         string              `json:"startCommand"`
-	RegistryCredentialId string              `json:"registryCredentialId,omitempty"`
+	DockerCommand        *string             `json:"dockerCommand,omitempty"`
+	DockerContext        *string             `json:"dockerContext,omitempty"`
+	DockerfilePath       *string             `json:"dockerfilePath,omitempty"`
+	PreDeployCommand     *string             `json:"preDeployCommand,omitempty"`
+	RegistryCredential   *RegistryCredential `json:"registryCredential,omitempty"`
+	BuildCommand         *string             `json:"buildCommand,omitempty"`
+	StartCommand         *string             `json:"startCommand,omitempty"`
+	RegistryCredentialId *string             `json:"registryCredentialId,omitempty"`
 }
 
 type OpenPort struct {
