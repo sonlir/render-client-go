@@ -1,4 +1,4 @@
-package render
+package main
 
 import (
 	"fmt"
@@ -44,10 +44,10 @@ type ServiceDetails struct {
 	PullRequestPreviewsEnabled string              `json:"pullRequestPreviewsEnabled,omitempty"`
 	Region                     string              `json:"region,omitempty"`
 	URL                        string              `json:"url,omitempty"`
-	Schedule                   string              `json:"schedule"`
+	Schedule                   *string             `json:"schedule,omitempty"`
 	LastSuccessfulRunAt        string              `json:"lastSuccessfulRunAt"`
-	BuildCommand               string              `json:"buildCommand"`
-	PublicPath                 string              `json:"publicPath"`
+	BuildCommand               *string             `json:"buildCommand,omitempty"`
+	PublishPath                string              `json:"publishPath"`
 	Headers                    []Header            `json:"headers,omitempty"`
 	Routes                     []Route             `json:"routes,omitempty"`
 }
