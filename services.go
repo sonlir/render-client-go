@@ -47,7 +47,7 @@ type ServiceDetails struct {
 	Schedule                   *string             `json:"schedule,omitempty"`
 	LastSuccessfulRunAt        string              `json:"lastSuccessfulRunAt"`
 	BuildCommand               *string             `json:"buildCommand,omitempty"`
-	PublishPath                string              `json:"publishPath"`
+	PublishPath                *string             `json:"publishPath,omitempty"`
 	Headers                    []Header            `json:"headers,omitempty"`
 	Routes                     []Route             `json:"routes,omitempty"`
 }
