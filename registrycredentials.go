@@ -1,4 +1,4 @@
-package render
+package main
 
 import (
 	"fmt"
@@ -6,23 +6,26 @@ import (
 	"net/url"
 )
 
-const registrycredentialsPath = "registrycredentials"
-
-type RegistryCredential struct {
-	ID        string  `json:"id"`
-	Name      string  `json:"name"`
-	Registry  string  `json:"registry"`
-	Username  string  `json:"username"`
-	AuthToken *string `json:"authToken,omitempty"`
-	OwnerId   *string `json:"ownerId,omitempty"`
+type RegistryCredentialRequest struct {
+	Registry  string `json:"registry"`
+	Name      string `json:"name"`
+	Username  string `json:"username"`
+	AuthToken string `json:"authToken"`
+	OwnerId   string `json:"ownerId"`
+}
+type RegistryCredentialResponse struct {
+	ID       string `json:"id"`
+	Name     string `json:"name"`
+	Registry string `json:"registry"`
+	Username string `json:"username"`
 }
 
 type GetRegistryCredentialsArgs struct {
 	Name string
 }
 
-func (c *Client) GetRegistryCredentials(args *GetRegistryCredentialsArgs) ([]RegistryCredential, error) {
-	var registryCredentials []RegistryCredential
+func (c *Client) GetRegistryCredentials(args *GetRegistryCredentialsArgs) ([]RegistryCredentialResponse, error) {
+	var registryCredentials []RegistryCredentialResponse
 	parameters := url.Values{}
 	url, err := url.Parse(fmt.Sprintf("%s/%s", c.HostURL, registrycredentialsPath))
 	if err != nil {
@@ -44,8 +47,8 @@ func (c *Client) GetRegistryCredentials(args *GetRegistryCredentialsArgs) ([]Reg
 	return registryCredentials, nil
 }
 
-func (c *Client) GetRegistryCredential(id string) (*RegistryCredential, error) {
-	var registryCredential *RegistryCredential
+func (c *Client) GetRegistryCredential(id string) (*RegistryCredentialResponse, error) {
+	var registryCredential *RegistryCredentialResponse
 	err := c.doRequest(http.MethodGet, fmt.Sprintf("%s/%s/%s", c.HostURL, registrycredentialsPath, id), nil, &registryCredential)
 	if err != nil {
 		return nil, err
@@ -54,8 +57,8 @@ func (c *Client) GetRegistryCredential(id string) (*RegistryCredential, error) {
 	return registryCredential, nil
 }
 
-func (c *Client) CreateRegistryCredential(data RegistryCredential) (*RegistryCredential, error) {
-	var registryCredential *RegistryCredential
+func (c *Client) CreateRegistryCredential(data RegistryCredentialRequest) (*RegistryCredentialResponse, error) {
+	var registryCredential *RegistryCredentialResponse
 
 	registryCredentials, err := c.GetRegistryCredentials(&GetRegistryCredentialsArgs{Name: data.Name})
 	if err != nil {
@@ -73,8 +76,8 @@ func (c *Client) CreateRegistryCredential(data RegistryCredential) (*RegistryCre
 	return registryCredential, nil
 }
 
-func (c *Client) UpdateRegistryCredential(id string, data RegistryCredential) (*RegistryCredential, error) {
-	var registryCredential *RegistryCredential
+func (c *Client) UpdateRegistryCredential(id string, data RegistryCredentialRequest) (*RegistryCredentialResponse, error) {
+	var registryCredential *RegistryCredentialResponse
 
 	registryCredentials, err := c.GetRegistryCredentials(&GetRegistryCredentialsArgs{Name: data.Name})
 	if err != nil {

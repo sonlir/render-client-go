@@ -1,12 +1,10 @@
-package render
+package main
 
 import (
 	"fmt"
 	"net/http"
 	"net/url"
 )
-
-const ownersPath = "owners"
 
 type Owner struct {
 	ID    string `json:"id"`
