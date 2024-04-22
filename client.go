@@ -10,7 +10,14 @@ import (
 )
 
 // HostURL - Default Render API URL
-const HostURL string = "https://api.render.com/v1"
+const (
+	HostURL                  string = "https://api.render.com/v1"
+	servicesPath             string = "services"
+	customDomainsPath        string = "custom-domains"
+	environmentVariablesPath string = "env-vars"
+	ownersPath               string = "owners"
+	registrycredentialsPath  string = "registrycredentials"
+)
 
 type Client struct {
 	HostURL    string

@@ -6,8 +6,6 @@ import (
 	"net/url"
 )
 
-const ownersPath = "owners"
-
 type Owner struct {
 	ID    string `json:"id"`
 	Name  string `json:"name"`

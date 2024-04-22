@@ -5,11 +5,9 @@ import (
 	"net/http"
 )
 
-const environmentVariablesPath = "env-vars"
-
 type EnvironmentVariable struct {
-	Key   string `json:"key,omitempty"`
-	Value string `json:"value,omitempty"`
+	Key   string `json:"key"`
+	Value string `json:"value"`
 }
 
 type EnvironmentVariables struct {

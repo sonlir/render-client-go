@@ -5,8 +5,6 @@ import (
 	"net/http"
 )
 
-const customDomainsPath = "custom-domains"
-
 type CustomDomain struct {
 	ID                 *string `json:"id,omitempty"`
 	Name               string  `json:"name"`
