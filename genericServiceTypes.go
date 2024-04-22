@@ -1,4 +1,4 @@
-package main
+package render
 
 type BuildFilter struct {
 	Paths        []string `json:"paths"`
